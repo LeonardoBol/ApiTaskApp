@@ -3,7 +3,7 @@ import { conect } from "../database";
 var fs = require("fs")
 
 
-export const saveAttachment = async (req, res) => {
+export const saveAttachmentEditTask = async (req, res) => {
 
     console.log('La cantidad de archivos que llegan es: ', req.files.file.length)
     for (let i = 0; i < req.files.file.length; i++) {
@@ -24,10 +24,51 @@ export const saveAttachment = async (req, res) => {
             // GUARDADDO DE LOS ADJUNTOS
             const [results] = await conn.execute(
                 "INSERT INTO attachments (file,originalname,tasks_id) VALUES (?,?,?)",
-                [
+                [     
                     Attachment.file,
                     Attachment.originalname,
                     Attachment.task_id,
+                ])
+
+            return res.status(200).json(Attachment)
+
+        }
+        catch (e) {
+            console.log(e);
+            return res.status(500).json({ message: "Ha ocurrido un error con el servidor" });
+        }
+    }
+};
+
+export const saveAttachmentCreateTask = async (req, res) => {
+
+    console.log('La cantidad de archivos que llegan es: ', req.files.file.length)
+    for (let i = 0; i < req.files.file.length; i++) {
+        try {
+            //Valida la conexion a la base de datos
+            const conn = await conect();
+
+            console.log(req.files.file[i].path);
+
+            
+            const [counter] = await conn.execute(`SELECT * FROM counter_tasks`);
+            const task_id = counter[0].count;
+
+            
+            const Attachment =
+            {
+                file: ('http://localhost:5000/uploads/' + req.files.file[i].filename),
+                originalname: req.files.file[i].originalname
+            }
+            console.log(Attachment);
+
+            // GUARDADDO DE LOS ADJUNTOS
+            const [results] = await conn.execute(
+                "INSERT INTO attachments (file,originalname,tasks_id) VALUES (?,?,?)",
+                [     
+                    Attachment.file,
+                    Attachment.originalname,
+                    task_id,
                 ])
 
             return res.status(200).json(Attachment)
@@ -58,7 +99,6 @@ export const getAttachments = async (req, res) => {
 export const deleteAttachments = async (req, res) => {
     try{
         const conn = await conect();
-        console.log('delete: esto llega', req.body)
 
         const [results] = await conn.execute("DELETE FROM attachments WHERE id= ?", [req.body.id])
 

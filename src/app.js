@@ -19,7 +19,7 @@ import attachmentRoutes from './routes/attachments'
 const multer = require('multer');
 
 const storage = multer.diskStorage({
-    destination: path.join(__dirname, 'public/uploads' ) ,
+    destination: path.join(__dirname, 'public/uploads' ),
     filename: (req, file, cb) => {
         cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
     }

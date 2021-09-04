@@ -95,6 +95,12 @@ export const storeTask = async (req, res) => {
                 text: 'Se le ha asignado una tarea correspondiente al proyecto: ' + task.project + '. \n\nFecha de entrega: ' + task.end_date + '\n\n' + 'Descripción: \n' + task.description // plain text body
             });
 
+            const [counter] = await conn.execute(`SELECT * FROM counter_tasks`);
+            const task_id = counter[0].count;
+
+            await conn.execute(`UPDATE counter_tasks SET count = ? WHERE count = ?`, 
+                [task_id + 1, task_id]);
+
             return res.json({
                 message: "Registro exitoso",
                 task: task
